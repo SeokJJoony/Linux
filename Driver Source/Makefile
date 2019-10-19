@@ -1,27 +1,19 @@
-DEV :=led
-DD :=fpga_$(DEV)_driver
-APP :=fpga_$(DEV)_test
-TFTPDIR := /tftpboot
-CC = arm-none-linux-gnueabi-gcc
-KDIR := /root/work/achroimx6q/kernel
-PWD := $(shell pwd)
-obj-m := $(DD).o
+obj-m := fpga_step_motor_driver.o fpga_push_switch_driver.o sonic_driver.o fpga_buzzer_driver.o ofpga_text_lcd_driver.o
 
-all:	$(DD) $(APP)
+KDIR :=/root/work/achroimx6q/kernel
+PWD :=$(shell pwd)
 
-$(DD):	$(DD).c
+all: driver app
+driver:
 	$(MAKE) -C $(KDIR) SUBDIRS=$(PWD) modules ARCH=arm
-
-$(APP): $(APP).c
-	$(CC) -o $(APP) $(APP).c
-
-install:
-	cp -a $(DD).ko $(APP) $(TFTPDIR)
-
+app:
+	arm-none-linux-gnueabi-g++ -I/root/work/OPENCV/opencv-2.4.13/build/install/include -L/root/work/OPENCV/opencv-2.4.13/build/install/lib final.c -lopencv_calib3d -lopencv_contrib -lopencv_core -lopencv_features2d -lopencv_flann -lopencv_gpu -lopencv_highgui -lopencv_imgproc -lopencv_legacy -lopencv_ml -lopencv_nonfree -lopencv_objdetect -lopencv_ocl -lopencv_photo -lopencv_stitching -lopencv_superres -lopencv_ts -lopencv_video -lopencv_videostab -lrt -lpthread -lm -ldl -o final
 clean:
-	rm -rf *.ko *.mod.* *.order *.symvers *.o $(APP)
-
-new:
-	$(MAKE) clean
-	$(MAKE)
-
+	rm -rf *.ko
+	rm -rf *.mod.*
+	rm -rf *.o
+	rm -rf final
+	rm -rf Module.symvers
+	rm -rf modules.order
+	rm -rf .fnd*
+	rm -rf .tmp*
